@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Results</title>
+</head>
+
+<body>
+    <a href="http://localhost:8080/">Back to Form</a>
+
+    <script>
+        getData()
+        async function getData() {
+            let params = (new URL(document.location)).searchParams;
+
+            const response = await fetch('/query?' + new URLSearchParams({
+                query: params.get("query"),
+                page: params.has("page") ? params.get("page") : 0,
+            }))
+
+            const resp = await response.json()
+
+            console.log(encodeURIComponent(params.get("query")))
+
+            const nextPage = document.createElement('a')
+            nextPage.textContent = "Next page"
+            nextPage.setAttribute('href', `result?query=${encodeURIComponent(params.get("query"))}&page=${Number(params.get("page"))+1}`)
+            document.body.append(nextPage)
+
+            const totalDocs = document.createElement('div')
+            totalDocs.style.margin = "30px"
+            totalDocs.textContent = `Total documents found: ${resp.total_documents}`
+            totalDocs.style.color = "tomato"
+            document.body.append(totalDocs)
+
+            for (item of resp.data) {
+                const results = document.createElement('div');
+                const filename = document.createElement('a');
+                const preview = document.createElement('div');
+
+                filename.textContent = `${item.id}.txt`
+                filename.setAttribute('href', `/doc/${item.id}`)
+
+                preview.textContent = `${item.text}`
+                preview.style.marginBottom = "30px"
+
+                results.style.maxWidth = "750px"
+                results.style.marginLeft = "30px"
+                results.append(filename, preview);
+                document.body.append(results);
+            }
+        }
+    </script>
+</body>
+</html>
