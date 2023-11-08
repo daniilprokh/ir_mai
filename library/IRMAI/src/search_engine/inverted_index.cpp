@@ -1,22 +1,21 @@
-#include <IRMAI/inverted_index/inverted_index.h>
+#include <IRMAI/search_engine/inverted_index.h>
 
 #include <IRMAI/query/query_processor.h>
-
-#include <boost/filesystem.hpp>
-#include <boost/serialization/unordered_map.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
 
 #include <algorithm>
 #include <fstream>
 
-InvertedIndex::InvertedIndex(
-    const std::vector<DocumentTokens> &corpusTokens) {
+std::vector<Document> InvertedIndex::FindDocuments(const std::string &term) {
+  auto it = data_.find(term);
+  return it != data_.end() 
+      ? std::vector<Document>(it->second)
+      : std::vector<Document>();
+}
+
+void InvertedIndex::OnInitialize(const std::vector<DocumentTokens> &corpusTokens) {
   for (const auto& [document, tokens] : corpusTokens) {
     corpus_documents_.push_back(document);
+
     for (const std::string &token : tokens) {
       std::vector<Document>& token_documents = data_[token];
       if (token_documents.empty() || document != token_documents.back()) {
@@ -28,14 +27,7 @@ InvertedIndex::InvertedIndex(
   std::sort(corpus_documents_.begin(), corpus_documents_.end());
 }
 
-std::vector<Document> InvertedIndex::FindDocuments(const std::string &term) {
-  auto it = data_.find(term);
-  return it != data_.end() 
-      ? std::vector<Document>(it->second)
-      : std::vector<Document>();
-}
-
-std::vector<Document> InvertedIndex::SearchDocuments(
+std::vector<Document> InvertedIndex::OnSearchDocuments(
     const std::vector<std::string> &terms) {
   if (terms.size() == 0) {
     return std::vector<Document>();
@@ -67,7 +59,7 @@ std::vector<Document> InvertedIndex::SearchDocuments(
   return result;
 }
 
-std::vector<Document> InvertedIndex::SearchQuery(const Query &query) {
+std::vector<Document> InvertedIndex::OnSearchQuery(const Query &query) {
   auto evalution_term = 
       [this](const std::string &term) -> std::vector<Document> {
     std::vector<Document> documents = this->FindDocuments(term);
@@ -111,30 +103,4 @@ std::vector<Document> InvertedIndex::SearchQuery(const Query &query) {
       evalution_operation_not,
       evalution_operation_and,
       evalution_operation_or);
-}
-
-void InvertedIndex::Serialize(const std::filesystem::path& path) {
-  std::ofstream f(path, std::ios::binary);
-  if (!f.is_open()) {
-    return;
-  }
-
-  boost::archive::binary_oarchive oa(f);
-  oa << data_;
-  oa << corpus_documents_;
-
-  f.close();
-}
-
-void InvertedIndex::Deserialize(const std::filesystem::path& path) {
-  std::ifstream f(path, std::ios::binary);
-  if (!f.is_open()) {
-    return;
-  }
-
-  boost::archive::binary_iarchive ia(f);
-  ia >> data_;
-  ia >> corpus_documents_;
-
-  f.close();
 }

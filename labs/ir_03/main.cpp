@@ -1,5 +1,4 @@
-#include <IRMAI/inverted_index/inverted_index.h>
-#include <IRMAI/inverted_index/inverted_index_initializer.h>
+#include <IRMAI/search_engine/inverted_index.h>
 #include <IRMAI/split.h>
 #include <IRMAI/to_lower.h>
 
@@ -22,7 +21,7 @@ int main(int argc, char* argv[]) {
     ToLower(term);
   }
 
-  auto index = InvertedIndexInitializer::LoadOrBuild(index_path, corpus_path);
+  auto index = InvertedIndexInitializer::LoadOrBuild(index_path,corpus_path);
 
   for (const Document &document : index.SearchDocuments(terms)) {
     cout << document.Id() << '\n';

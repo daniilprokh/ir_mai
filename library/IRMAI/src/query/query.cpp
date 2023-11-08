@@ -116,3 +116,21 @@ void Query::OrderFromInfixToPostfix() {
 
   elements_ = std::move(postfix_order);
 }
+
+bool Query::IsBooleanQuery(std::string_view queryStr) {
+  for (char c : queryStr) {
+    switch (c)
+    {
+      case '&':
+      case '!':
+      case '|':
+      case '(':
+      case ')':
+        return true;
+      default:
+        break;
+    }
+  }
+
+  return false;
+}

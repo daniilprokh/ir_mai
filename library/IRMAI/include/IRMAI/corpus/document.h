@@ -4,6 +4,7 @@
 #include <boost/serialization/access.hpp>
 
 #include <filesystem>
+#include <functional>
 #include <string>
 
 class Document{
@@ -54,5 +55,13 @@ inline bool operator==(const Document &lhs, const Document &rhs) {
 inline bool operator!=(const Document &lhs, const Document &rhs) {
   return !operator==(lhs, rhs);
 }
+
+template<> struct std::hash<Document>
+{
+  std::size_t operator()(const Document &d) const
+  {
+    return std::hash<int>{}(d.Id());
+  }
+};
 
 #endif

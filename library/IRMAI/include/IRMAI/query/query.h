@@ -10,6 +10,8 @@ class Query {
     Query() = delete;
 
     explicit Query(std::string_view queryStr);
+
+    static bool IsBooleanQuery(std::string_view queryStr);
   private:
 
     friend class QueryProcessor;
@@ -27,7 +29,6 @@ class Query {
     void ParseStringInInfixFormat(std::string_view &&queryStr);
 
     void OrderFromInfixToPostfix();
-
 
     std::vector<QueryElement> elements_;
 };

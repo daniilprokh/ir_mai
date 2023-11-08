@@ -1,4 +1,4 @@
-#include <IRMAI/search_engine/inverted_index.h>
+#include <IRMAI/search_engine/ranked_searcher.h>
 #include <IRMAI/query/query.h>
 
 #include <chrono>
@@ -13,14 +13,15 @@ int main(int argc, char* argv[]) {
   }
 
   filesystem::path corpus_path{argv[1]};
-  filesystem::path index_path{argv[2]};
+  filesystem::path ranked_searcher_path{argv[2]};
 
   Query query(argv[3]);
 
-  auto index = InvertedIndexInitializer::LoadOrBuild(index_path, corpus_path);
+  auto searcher = RankedSearcherInitializer::LoadOrBuild(ranked_searcher_path,
+                                                         corpus_path);
 
   auto search_begin = chrono::steady_clock::now();
-  auto documents = index.SearchQuery(query);
+  auto documents = searcher.SearchQuery(query);
   auto search_end = chrono::steady_clock::now();
   auto search_diff = search_end - search_begin;
   cout << "Search time: " << 

@@ -3,7 +3,7 @@
 
 #include "http_request_handler.h"
 
-#include <IRMAI/inverted_index/inverted_index_initializer.h>
+#include <IRMAI/search_engine/search_engine_initializer.h>
 
 #include <Poco/Net/HTTPServer.h>
 #include <Poco/Util/Option.h>
@@ -21,6 +21,7 @@ using Poco::Util::OptionCallback;
 using Poco::Util::OptionSet;
 using Poco::Util::ServerApplication;
 
+template <class Searcher>
 class HTTPWebServer : public ServerApplication {
   protected:
 
@@ -40,7 +41,7 @@ class HTTPWebServer : public ServerApplication {
       path_storage_.start_page_path_ = config().getString("start_page_path");
       path_storage_.result_page_path_ = config().getString("result_page_path");
 
-      context_.index_ = InvertedIndexInitializer::LoadOrBuild(
+      context_.searcher_ = SearchEngineInitializer<Searcher>::LoadOrBuild(
           config().getString("index_data_path"),
           path_storage_.corpus_path_);
     }
@@ -71,7 +72,7 @@ class HTTPWebServer : public ServerApplication {
       return Application::EXIT_OK;
     }
   private:
-    QueryContext context_;
+    QueryContext<Searcher> context_;
     PathStorage path_storage_;
 };
 

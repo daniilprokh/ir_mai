@@ -20,9 +20,10 @@ struct PathStorage {
   std::filesystem::path result_page_path_;
 };
 
+template <class Searcher>
 class RequestHandlerFactory : public HTTPRequestHandlerFactory {
   public:
-    RequestHandlerFactory(QueryContext* context,
+    RequestHandlerFactory(QueryContext<Searcher>* context,
                           const PathStorage& pathStorage)
       : context_(context),
         path_storage_(pathStorage)
@@ -33,7 +34,7 @@ class RequestHandlerFactory : public HTTPRequestHandlerFactory {
       const std::string& uri = r.getURI();
 
       if (ContainsSubstr(uri, "/query")) {
-        return new QueryHandler(context_, path_storage_.corpus_path_);
+        return new QueryHandler<Searcher>(context_, path_storage_.corpus_path_);
       }
 
       if (ContainsSubstr(uri, "/doc")) {
@@ -47,7 +48,7 @@ class RequestHandlerFactory : public HTTPRequestHandlerFactory {
       return new IndexHandler(path_storage_.start_page_path_);
     } 
   private:
-    QueryContext* context_;
+    QueryContext<Searcher>* context_;
     PathStorage path_storage_;
 };
 
